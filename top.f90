@@ -1,22 +1,16 @@
-!  ======================================
-!  Generate randomly distributed Ar atoms
-!            September, 2020
-!  ======================================
-
-! ===================================================================================
-! This script can be used to generate random initial configuration of atoms.
-! The obtained topology is converted to LAMMPS topology format using fort2lmp.py
-! Slight modifications of this code can be used to generate multicomponent mixtures.
-! ===================================================================================
+!  =========================================================================
+!  Generira nakljucno razporeditev atomov v ortogonalni simulacijski skatli;
+!  bliznji kontakti izkljuceni
+!  =========================================================================
 
 program argon
   implicit none
 
-  real*8, parameter  :: aa = 33.6d0     ! cell constants
+  real*8, parameter  :: aa = 33.6d0      ! robovi skatle
   real*8, parameter  :: bb = 33.6d0
   real*8, parameter  :: cc = 33.6d0
-  integer, parameter :: N  = 864        ! number of atoms
-  real*8, parameter  :: Rc = 2.5d0       ! minimal initial atom-atom distance 
+  integer, parameter :: N  = 864         ! stevilo atomov
+  real*8, parameter  :: Rc = 2.5d0       ! minimalna razdalja med atomoma 
   real*8, allocatable :: x(:),y(:),z(:)
 
   real*8 :: dx, dy, dz, d, dmin, xt, yt, zt
@@ -24,12 +18,12 @@ program argon
 
   allocate(x(1:N), y(1:N), z(1:N))
 
-  open(unit=11, file="topF90.Ar")
+  open(unit=11, file="top.raw")
 
   j = 1
   do while (j .le. N)
 
-     ! add first particle
+     ! dodaj 1. delec
      if (j == 1) then
         call random_number(xt)
         call random_number(yt)
@@ -43,7 +37,7 @@ program argon
         j = j + 1
      end if
 
-     ! add N-1 particles
+     ! dodaj N-1 delcev
      if (j > 1) then
         call random_number(xt)
         call random_number(yt)
@@ -95,7 +89,7 @@ program argon
 
   end do
 
-  ! write coordinate file
+  ! shrani v datoteko
   do k = 1, N
      write(11,*) k, x(k), y(k), z(k)
   end do
