@@ -1,16 +1,18 @@
-#  =========================================================
-#  Convert Fortran generated topology to LAMMPS input format
-#                      September, 2020
-#  =========================================================
+'''
 
-# input params.
+    Pretvori generirano zacetno razporeditev atomov v format primeren za LAMMPS;
+    predpostavlja: units = real
+
+'''
+
+# vhodni parametri
 aa = 33.6
 bb = 33.6
-cc = bb
-sigma = 1.0
+cc = 33.6
+M  = 39.948
 
-# read F90 file
-o = open('topF90.Ar', 'r')
+# preberi koordinate
+o = open('top.raw', 'r')
 crd = []
 
 for line in o:
@@ -21,10 +23,10 @@ for line in o:
             atm.append(elt)
     crd.append(atm)
 
-# create LAMMPS .data format
+# generiraj LAMMPS format
 o = open('top.Ar', 'w')
 nUnit = len(crd)
-o.write('Argon random initial configuration'+'\n')
+o.write('Nakljucna zacetna razporeditev atomov'+'\n')
 o.write('\n')
 o.write(str(nUnit) + ' ' + 'atoms' + '\n')
 o.write('0 bonds' + '\n')
@@ -34,21 +36,21 @@ o.write('0 impropers' + '\n')
 o.write('\n')
 o.write('1 atom types' + '\n')
 o.write('\n')
-o.write('0.0 ' + str(aa/sigma) + ' xlo xhi'+'\n')
-o.write('0.0 ' + str(bb/sigma) + ' ylo yhi'+'\n')
-o.write('0.0 ' + str(cc/sigma) + ' zlo zhi'+'\n')
+o.write('0.0 ' + str(aa) + ' xlo xhi'+'\n')
+o.write('0.0 ' + str(bb) + ' ylo yhi'+'\n')
+o.write('0.0 ' + str(cc) + ' zlo zhi'+'\n')
 o.write('\n')
 o.write('Masses' + '\n')
 o.write('\n')
-o.write('  1 ' + str(39.948) + '\n')
+o.write('  1 ' + str(M) + '\n')
 o.write('\n')
 o.write('Atoms' + '\n')
 o.write('\n')
 
 for at in crd:
-    x = float(at[1])/sigma
-    y = float(at[2])/sigma
-    z = float(at[3])/sigma
+    x = float(at[1])
+    y = float(at[2])
+    z = float(at[3])
     o.write('  ' + str(at[0]) + ' 1  ' + str(x) + ' ' + str(y) + ' ' + str(z) + '\n')
 
 o.close()
