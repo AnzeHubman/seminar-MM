@@ -1,0 +1,58 @@
+#
+#   Izracun toplotne prevodnosti
+#
+
+# osnovni parametri
+units          real
+dimension      3
+boundary       p p p
+
+# topologija
+atom_style     atomic
+read_data      top.Ar
+
+# polje sil
+pair_style     lj/cut 8.5
+pair_coeff     1 1 0.23807 3.405 8.5
+pair_modify    tail yes
+
+# minimizacija
+min_style      cg
+minimize       1.0e-4 1.0e-6 100 1000
+reset_timestep 0
+
+# nastavitve MD
+timestep       4.0
+velocity       all create 220.0 1045358 mom yes rot yes dist gaussian
+run_style      verlet
+
+# 1. - termalizacija
+thermo         1000
+thermo_style   custom step temp etotal
+fix	       1 all temp/rescale 1 220.0 220.0 0.01 1.0
+fix	       2 all nve
+run	       50000
+unfix	       1
+unfix	       2
+reset_timestep 0
+
+# 2. - ekvilibracija - Nose-Hoover
+thermo         1000
+thermo_style   custom step temp etotal
+fix	       3 all nvt temp 220.0 220.0 400.0
+run	       50000
+unfix	       3
+reset_timestep 0
+
+# 3. - vzorcenje - NVE
+thermo         1
+compute        kinet all ke/atom
+compute        poten all pe/atom
+compute        stres all stress/atom NULL virial
+compute	       flux all heat/flux kinet poten stres
+variable       Jx equal c_flux[1]
+variable       Jy equal c_flux[2]
+variable       Jz equal c_flux[3]
+thermo_style   custom step temp v_Jx v_Jy v_Jz
+fix	       4 all nve
+run            1200000
